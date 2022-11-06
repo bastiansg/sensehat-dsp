@@ -26,15 +26,14 @@ class Display(SenseHat):
 
         logger.info("loading images")
         self.load_images(image_path)
+        self.reset()
 
-        self.stop_all()
-
-    def stop_all(self):
+    def reset(self):
         self.intermittent_image_run = False
         self.color_cycle_run = False
+        self.clear()
 
     def parse_raw_image(self, raw_image: dict) -> np.ndarray:
-
         parsed_image = [
             raw_image["d-color"] if pixel else raw_image["l-color"]
             for pixel in raw_image["image"]
