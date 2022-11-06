@@ -38,13 +38,14 @@ class Display(SenseHat):
     def parse_raw_image(
             self,
             raw_image: dict
-        ) -> list[tuple[int, int, int]]:
+        ) -> np.ndarray:
 
         parsed_image = [
             raw_image["d-color"] if pixel else raw_image["l-color"]
             for pixel in raw_image["image"]
         ]
 
+        parsed_image = np.array(parsed_image)
         return parsed_image
 
     def load_images(self, image_path: str):
@@ -57,7 +58,7 @@ class Display(SenseHat):
     def color_cycle(self, image_name: str):
         self.mutex.acquire()
         r, g, b = (255, 0, 0)
-        image_mask = np.array(self.images[image_name])
+        image_mask = self.images[image_name]
         image_mask[image_mask > 0] = 1
         while self.color_cycle_run:
             r, g, b = next_color(r, g, b)
