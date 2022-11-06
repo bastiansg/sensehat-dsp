@@ -4,7 +4,7 @@ from time import sleep
 from sense_hat import SenseHat
 from threading import Thread, Lock
 
-from ..utils.json_data import load_json
+from sensehat_dsp.utils.json_data import load_json
 from .utils import next_color
 
 
