@@ -1,5 +1,3 @@
-import os
-
 import numpy as np
 
 from time import sleep
@@ -17,10 +15,10 @@ logger = get_logger(__name__)
 
 class Display(SenseHat):
     def __init__(
-            self,
-            image_path: str = "/resources/dsp-images/dsp-images.json",
-            initial_rotation: int = 180,
-        ):
+        self,
+        image_path: str = "/resources/dsp-images/dsp-images.json",
+        initial_rotation: int = 180,
+    ):
 
         SenseHat.__init__(self)
         self.mutex = Lock()
@@ -30,15 +28,12 @@ class Display(SenseHat):
         self.load_images(image_path)
 
         self.stop_all()
-    
+
     def stop_all(self):
         self.intermittent_image_run = False
         self.color_cycle_run = False
 
-    def parse_raw_image(
-            self,
-            raw_image: dict
-        ) -> np.ndarray:
+    def parse_raw_image(self, raw_image: dict) -> np.ndarray:
 
         parsed_image = [
             raw_image["d-color"] if pixel else raw_image["l-color"]
@@ -54,7 +49,7 @@ class Display(SenseHat):
             raw_image["name"]: self.parse_raw_image(raw_image)
             for raw_image in raw_images
         }
-    
+
     def color_cycle(self, image_name: str):
         self.mutex.acquire()
         r, g, b = (255, 0, 0)
@@ -68,12 +63,7 @@ class Display(SenseHat):
         self.clear()
         self.mutex.release()
 
-    def intermittent_image(
-            self,
-            image_name: str,
-            refresh_rate: float
-        ):
-
+    def intermittent_image(self, image_name: str, refresh_rate: float):
         self.mutex.acquire()
         while self.intermittent_image_run:
             self.set_pixels(self.images[image_name])
@@ -83,16 +73,11 @@ class Display(SenseHat):
 
         self.mutex.release()
 
-    def start_intermittent_image(
-            self,
-            image_name: str,
-            refresh_rate: float
-        ):
-
+    def start_intermittent_image(self, image_name: str, refresh_rate: float):
         self.intermittent_image_run = True
         thread = Thread(
             target=self.intermittent_image,
-            args=(image_name, refresh_rate)
+            args=(image_name, refresh_rate),
         )
 
         thread.start()
@@ -102,11 +87,7 @@ class Display(SenseHat):
 
     def start_color_cycle(self, image_mask: str):
         self.color_cycle_run = True
-        thread = Thread(
-            target=self.color_cycle,
-            args=(image_mask, )
-        )
-
+        thread = Thread(target=self.color_cycle, args=(image_mask,))
         thread.start()
 
     def stop_color_cycle(self):

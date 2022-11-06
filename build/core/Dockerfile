@@ -45,10 +45,10 @@ RUN wget https://github.com/pypa/pip/archive/refs/tags/${PIP_VERSION}.zip \
 ARG RTIMULIB_VERSION
 ARG SENSEHAT_VERSION
 RUN curl -LO https://archive.raspberrypi.org/debian/pool/main/r/rtimulib/librtimulib-dev_${RTIMULIB_VERSION}_arm64.deb \
- && curl -LO https://archive.raspberrypi.org/debian/pool/main/r/rtimulib/librtimulib-utils_${RTIMULIB_VERSION}_arm64.deb \
- && curl -LO https://archive.raspberrypi.org/debian/pool/main/r/rtimulib/librtimulib7_${RTIMULIB_VERSION}_arm64.deb \
- && curl -LO https://archive.raspberrypi.org/debian/pool/main/r/rtimulib/python3-rtimulib_${RTIMULIB_VERSION}_arm64.deb \
- && curl -LO https://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/python3-sense-hat_${SENSEHAT_VERSION}_all.deb
+    && curl -LO https://archive.raspberrypi.org/debian/pool/main/r/rtimulib/librtimulib-utils_${RTIMULIB_VERSION}_arm64.deb \
+    && curl -LO https://archive.raspberrypi.org/debian/pool/main/r/rtimulib/librtimulib7_${RTIMULIB_VERSION}_arm64.deb \
+    && curl -LO https://archive.raspberrypi.org/debian/pool/main/r/rtimulib/python3-rtimulib_${RTIMULIB_VERSION}_arm64.deb \
+    && curl -LO https://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/python3-sense-hat_${SENSEHAT_VERSION}_all.deb
 
 RUN dpkg -i \
     librtimulib-dev_${RTIMULIB_VERSION}_arm64.deb \
@@ -60,7 +60,7 @@ RUN dpkg -i \
 # Install sensehat_dsp
 COPY ./src/sensehat_dsp /tmp/sensehat_dsp
 RUN --mount=type=cache,target=/root/.cache \
-    pip install ./sensehat_dsp 
+    pip install ./sensehat_dsp
 
 
 # Clean
