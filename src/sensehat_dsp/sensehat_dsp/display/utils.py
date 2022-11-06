@@ -1,5 +1,3 @@
-
-
 def next_color(r: int, g: int, b: int) -> tuple[int, int, int]:
     if (r == 255 and g < 255 and b == 0):
         g += 1

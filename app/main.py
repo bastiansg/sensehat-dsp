@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from models import Image, IntermittentImage
 
 
-app = FastAPI()
 dsp = Display()
+app = FastAPI()
 
 
 @app.post('/set_image/')
