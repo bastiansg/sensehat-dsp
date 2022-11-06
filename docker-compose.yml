@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+    sensehat-dsp-core:
+        image: ${CORE_IMAGE}
+        container_name: sensehat-dsp-core
+        network_mode: host
+        build:
+            context: .
+            dockerfile: ./build/core/Dockerfile
+            args:
+                - PYTHON_VERSION=${PYTHON_VERSION}
+                - PIP_VERSION=${PIP_VERSION}
+                - RTIMULIB_VERSION=${RTIMULIB_VERSION}
+                - SENSEHAT_VERSION=${SENSEHAT_VERSION}
+        volumes:
+            - $PWD/${SRC_VOLUME_MOUNT}
+            - $PWD/${NOTEBOOKS_VOLUME_MOUNT}
+            - $PWD/${RESOURCES_VOLUME_MOUNT}
+        env_file:
+            - .env
+        privileged: true
+
+    sensehat-dsp-jupyter:
+        image: ${JUPYTER_IMAGE}
+        container_name: sensehat-dsp-jupyter
+        network_mode: host
+        build:
+            context: .
+            dockerfile: ./build/jupyter/Dockerfile
+            args:
+                - CORE_IMAGE=${CORE_IMAGE}
+        volumes:
+            - $PWD/${SRC_VOLUME_MOUNT}
+            - $PWD/${NOTEBOOKS_VOLUME_MOUNT}
+            - $PWD/${RESOURCES_VOLUME_MOUNT}
+        env_file:
+            - .env
+        privileged: true
