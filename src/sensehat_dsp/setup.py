@@ -7,6 +7,7 @@ setup(
     version="1.0.0",
     install_requires=[
         "requests==2.28.1",
+        "rich==12.6.0",
     ],
     package_data={"": ["*.yml", "*.yaml"]},
     include_package_data=True,

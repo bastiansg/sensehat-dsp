@@ -36,3 +36,20 @@ services:
         env_file:
             - .env
         privileged: true
+
+    sensehat-dsp-app:
+        image: ${APP_IMAGE}
+        container_name: sensehat-dsp-app
+        network_mode: host
+        build:
+            context: .
+            dockerfile: ./build/app/Dockerfile
+            args:
+                - CORE_IMAGE=${CORE_IMAGE}
+        volumes:
+            - $PWD/${SRC_VOLUME_MOUNT}
+            - $PWD/${NOTEBOOKS_VOLUME_MOUNT}
+            - $PWD/${RESOURCES_VOLUME_MOUNT}
+        env_file:
+            - .env
+        privileged: true

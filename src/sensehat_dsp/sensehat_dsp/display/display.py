@@ -1,11 +1,18 @@
 import os
 
+import numpy as np
+
 from time import sleep
 from sense_hat import SenseHat
 from threading import Thread, Lock
 
+from sensehat_dsp.logger import get_logger
 from sensehat_dsp.utils.json_data import load_json
+
 from .utils import next_color
+
+
+logger = get_logger(__name__)
 
 
 class Display(SenseHat):
@@ -18,20 +25,24 @@ class Display(SenseHat):
         SenseHat.__init__(self)
         self.mutex = Lock()
         self.set_rotation(initial_rotation)
+
+        logger.info("loading images")
         self.load_images(image_path)
+
+        self.stop_all()
     
+    def stop_all(self):
+        self.intermittent_image_run = False
+        self.color_cycle_run = False
+
     def parse_raw_image(
             self,
             raw_image: dict
         ) -> list[tuple[int, int, int]]:
 
-        image = raw_image["image"]
-        d_color = raw_image["d-color"]
-        l_color = raw_image["l-color"]
-
         parsed_image = [
-            d_color if pixel else l_color
-            for pixel in image
+            raw_image["d-color"] if pixel else raw_image["l-color"]
+            for pixel in raw_image["image"]
         ]
 
         return parsed_image
@@ -43,10 +54,10 @@ class Display(SenseHat):
             for raw_image in raw_images
         }
     
-    def color_cycle(self, image_mask: str):
+    def color_cycle(self, image_name: str):
         self.mutex.acquire()
         r, g, b = (255, 0, 0)
-        image_mask = self.images[image_mask]
+        image_mask = np.array(self.images[image_name])
         image_mask[image_mask > 0] = 1
         while self.color_cycle_run:
             r, g, b = next_color(r, g, b)

@@ -10,3 +10,10 @@ jupyter-build: core-build
 
 jupyter-run:
 	docker compose up sensehat-dsp-jupyter
+
+
+app-build: core-build
+	docker compose build sensehat-dsp-app
+
+app-run:
+	docker compose up sensehat-dsp-app
