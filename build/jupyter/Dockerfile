@@ -1,6 +1,13 @@
 ARG CORE_IMAGE
+
 FROM ${CORE_IMAGE}
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    vim \
+    htop \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/tmp/* /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
@@ -22,12 +29,12 @@ COPY ./build/jupyter/requirements.txt .
 RUN --mount=type=cache,target=/root/.cache \
     pip install -r requirements.txt
 
-
 # Clean
 RUN rm -rf /tmp/*
 
-
 WORKDIR /notebooks
+
+RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 
 COPY ./build/jupyter/entrypoint.sh /usr/bin/entrypoint.sh
 ENTRYPOINT sh /usr/bin/entrypoint.sh

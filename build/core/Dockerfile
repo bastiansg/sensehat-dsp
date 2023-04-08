@@ -1,17 +1,11 @@
 FROM debian:bullseye-slim
 
-USER 0:100
-ENV LANG=C.UTF-8
-
-
 # OS packages
 ARG PYTHON_VERSION
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     unzip \
     curl \
-    htop \
-    vim \
     zsh \
     git-core \
     ca-certificates \
@@ -30,7 +24,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set default python version
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_VERSION} 1 \
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
-
 
 WORKDIR /tmp
 
@@ -61,7 +54,6 @@ RUN dpkg -i \
 COPY ./src/sensehat_dsp /tmp/sensehat_dsp
 RUN --mount=type=cache,target=/root/.cache \
     pip install ./sensehat_dsp
-
 
 # Clean
 RUN rm -rf /tmp/*

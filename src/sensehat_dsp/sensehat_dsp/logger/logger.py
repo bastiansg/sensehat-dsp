@@ -4,7 +4,7 @@ import logging
 from rich.logging import RichHandler
 
 
-LOG_LEVEL = os.getenv("DOCBROWN_LOG_LEVEL", "info")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "info")
 LOG_LEVEL_MAP = {
     "info": logging.INFO,
     "warning": logging.WARNING,
