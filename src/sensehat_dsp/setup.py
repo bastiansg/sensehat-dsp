@@ -1,6 +1,5 @@
 from setuptools import find_packages, setup
 
-
 setup(
     name="sensehat_dsp",
     packages=find_packages(),

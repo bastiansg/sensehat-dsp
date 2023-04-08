@@ -1,4 +1,3 @@
-version: '3.8'
 services:
     sensehat-dsp-core:
         image: ${CORE_IMAGE}

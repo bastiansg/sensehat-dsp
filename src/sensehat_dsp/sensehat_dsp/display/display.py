@@ -5,9 +5,9 @@ from sense_hat import SenseHat
 from threading import Thread, Lock
 
 from sensehat_dsp.logger import get_logger
-from sensehat_dsp.utils.json_data import load_json
 
 from .utils import next_color
+from .dsp_images import dsp_images
 
 
 logger = get_logger(__name__)
@@ -16,16 +16,14 @@ logger = get_logger(__name__)
 class Display(SenseHat):
     def __init__(
         self,
-        image_path: str = "/resources/dsp-images/dsp-images.json",
         initial_rotation: int = 180,
     ):
-
         SenseHat.__init__(self)
         self.mutex = Lock()
         self.set_rotation(initial_rotation)
 
         logger.info("loading images")
-        self.load_images(image_path)
+        self.load_images()
         self.reset()
 
     def reset(self):
@@ -42,11 +40,10 @@ class Display(SenseHat):
         parsed_image = np.array(parsed_image)
         return parsed_image
 
-    def load_images(self, image_path: str):
-        raw_images = load_json(image_path)
+    def load_images(self):
         self.images = {
-            raw_image["name"]: self.parse_raw_image(raw_image)
-            for raw_image in raw_images
+            dsp_image["name"]: self.parse_raw_image(dsp_image)
+            for dsp_image in dsp_images
         }
 
     def color_cycle(self, image_name: str):

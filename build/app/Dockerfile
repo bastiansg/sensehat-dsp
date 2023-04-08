@@ -1,6 +1,6 @@
 ARG CORE_IMAGE
-FROM ${CORE_IMAGE}
 
+FROM ${CORE_IMAGE}
 
 WORKDIR /tmp
 
@@ -9,10 +9,8 @@ COPY ./build/app/requirements.txt .
 RUN --mount=type=cache,target=/root/.cache \
     pip install -r requirements.txt
 
-
 # Clean
 RUN rm -rf /tmp/*
-
 
 COPY ./app /root/app
 WORKDIR /root/app

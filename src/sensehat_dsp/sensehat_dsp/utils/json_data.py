@@ -31,7 +31,6 @@ def group_by_key(
     group_key: str,
     sort_key: str = "",
 ) -> Iterator[list[dict]]:
-
     if sort_key:
         json_iter = sorted(json_iter, key=lambda x: x[sort_key])
 
