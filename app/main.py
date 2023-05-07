@@ -1,31 +1,23 @@
+import sys
+
 from sensehat_dsp.display import Display
 
-from fastapi import FastAPI
-from models import Image, IntermittentImage
+# from sensehat_dsp.pixoo_client import Pixoo
+
+from sensehat_dsp.logger import get_logger
 
 
-dsp = Display()
-app = FastAPI()
+logger = get_logger(__name__)
 
 
-@app.post("/set_image/")
-async def set_image(image: Image):
-    dsp.set_image(image.image_name)
+def main():
+    dsp = Display()
+    # pixoo = Pixoo(mac_address="11:75:58:19:63:37")
+    # pixoo.connect()
+    while True:
+        event = dsp.stick.wait_for_event(emptybuffer=True)
+        logger.info(f"{event.action}_{event.direction}")
 
 
-@app.post("/intermittent_image/")
-async def start_intermittent_image(intermittent_image: IntermittentImage):
-    dsp.start_intermittent_image(
-        intermittent_image.image_name,
-        intermittent_image.refresh_rate,
-    )
-
-
-@app.post("/color_cycle/")
-async def start_color_cycle(image: Image):
-    dsp.start_color_cycle(image.image_name)
-
-
-@app.post("/reset/")
-async def reset():
-    dsp.reset()
+if __name__ == "__main__":
+    sys.exit(main())
