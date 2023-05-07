@@ -5,8 +5,8 @@ setup(
     packages=find_packages(),
     version="1.0.0",
     install_requires=[
-        "requests==2.28.2",
-        "rich==13.3.3",
+        "rich==13.3.5",
+        "pydantic==1.10.7",
     ],
     package_data={"": ["*.yml", "*.yaml"]},
     include_package_data=True,
