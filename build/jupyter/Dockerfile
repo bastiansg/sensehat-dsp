@@ -2,7 +2,9 @@ ARG CORE_IMAGE
 
 FROM ${CORE_IMAGE}
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=target=/var/cache/apt,type=cache,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
     vim \
     htop \
     && apt-get autoremove -y \

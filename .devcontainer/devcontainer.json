@@ -1,6 +1,6 @@
 {
 	"name": "sensehat-dsp",
-	"initializeCommand": "make core-build",
+	"initializeCommand": "make api-build",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "sensehat-dsp-devcontainer${localEnv:DEVCONTAINER_DEFAULT_DEVICE}",
 	"workspaceFolder": "/workspace",
@@ -40,5 +40,5 @@
 			]
 		}
 	},
-	"postCreateCommand": "pip install -e /workspace/src/sensehat_dsp"
+	"postCreateCommand": "pip install -e /workspace/src/sensehat_dsp && git config --global --add safe.directory /workspace"
 }
