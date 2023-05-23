@@ -26,7 +26,7 @@ def threaded(func: Callable):
 class Display(SenseHat):
     def __init__(
         self,
-        initial_rotation: int = 180,
+        initial_rotation: int = 0,
     ):
         super().__init__()
 
