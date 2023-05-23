@@ -36,13 +36,13 @@ services:
             - .env
         privileged: true
 
-    sensehat-dsp-api:
-        image: ${API_IMAGE}
-        container_name: sensehat-dsp-api
+    sensehat-dsp-app:
+        image: ${APP_IMAGE}
+        container_name: sensehat-dsp-app
         network_mode: host
         build:
             context: .
-            dockerfile: ./build/api/Dockerfile
+            dockerfile: ./build/app/Dockerfile
             args:
                 - CORE_IMAGE=${CORE_IMAGE}
         volumes:
@@ -52,3 +52,4 @@ services:
         env_file:
             - .env
         privileged: true
+        restart: unless-stopped

@@ -12,8 +12,11 @@ jupyter-run:
 	docker compose up sensehat-dsp-jupyter
 
 
-api-build: core-build
-	docker compose build sensehat-dsp-api
+app-build: core-build
+	docker compose build sensehat-dsp-app
 
-api-run:
-	docker compose up sensehat-dsp-api
+app-run: app-build
+	docker compose run sensehat-dsp-app
+
+app-up: app-build
+	docker compose up sensehat-dsp-app -d

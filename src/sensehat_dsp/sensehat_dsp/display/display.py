@@ -1,6 +1,7 @@
 import numpy as np
 
 from time import sleep
+from typing import Callable
 from sense_hat import SenseHat
 from threading import Thread, Lock
 
@@ -14,12 +15,21 @@ from .dsp_images import dsp_images
 logger = get_logger(__name__)
 
 
+def threaded(func: Callable):
+    def wrapper(*args, **kwargs):
+        thread = Thread(target=func, args=args, kwargs=kwargs)
+        thread.start()
+
+    return wrapper
+
+
 class Display(SenseHat):
     def __init__(
         self,
         initial_rotation: int = 180,
     ):
-        SenseHat.__init__(self)
+        super().__init__()
+
         self.mutex = Lock()
         self.set_rotation(initial_rotation)
 
@@ -47,11 +57,14 @@ class Display(SenseHat):
             for dsp_image in dsp_images
         }
 
-    def color_cycle(self, image: Image):
+    @threaded
+    def start_color_cycle(self, image: Image):
         self.mutex.acquire()
         r, g, b = (255, 0, 0)
         image_mask = self.images[image.name]
         image_mask[image_mask > 0] = 1
+
+        self.color_cycle_run = True
         while self.color_cycle_run:
             r, g, b = next_color(r, g, b)
             image = image_mask * [r, g, b]
@@ -60,8 +73,13 @@ class Display(SenseHat):
         self.clear()
         self.mutex.release()
 
-    def intermittent_image(self, int_image: IntermittentImage):
+    def stop_color_cycle(self):
+        self.color_cycle_run = False
+
+    @threaded
+    def start_intermittent_image(self, int_image: IntermittentImage):
         self.mutex.acquire()
+        self.intermittent_image_run = True
         while self.intermittent_image_run:
             self.set_pixels(self.images[int_image.name])
             sleep(int_image.refresh_rate)
@@ -70,25 +88,8 @@ class Display(SenseHat):
 
         self.mutex.release()
 
-    def start_intermittent_image(self, int_image: IntermittentImage):
-        self.intermittent_image_run = True
-        thread = Thread(
-            target=self.intermittent_image,
-            args=(int_image,),
-        )
-
-        thread.start()
-
     def stop_intermittent_image(self):
         self.intermittent_image_run = False
-
-    def start_color_cycle(self, image: Image):
-        self.color_cycle_run = True
-        thread = Thread(target=self.color_cycle, args=(image,))
-        thread.start()
-
-    def stop_color_cycle(self):
-        self.color_cycle_run = False
 
     def set_image(self, image: Image):
         self.mutex.acquire()

@@ -1,4 +1,4 @@
-FROM sensehat-dsp/api:latest
+FROM sensehat-dsp/core:latest
 
 WORKDIR /tmp
 

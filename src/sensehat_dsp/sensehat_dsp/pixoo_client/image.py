@@ -6,7 +6,7 @@ from PIL import Image
 
 
 def cv2pil(cv_image: np.ndarray) -> Image:
-    cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+    # cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
     pil_image = Image.fromarray(cv_image)
 
     return pil_image

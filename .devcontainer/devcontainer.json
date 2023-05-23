@@ -1,6 +1,6 @@
 {
 	"name": "sensehat-dsp",
-	"initializeCommand": "make api-build",
+	"initializeCommand": "make core-build",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "sensehat-dsp-devcontainer${localEnv:DEVCONTAINER_DEFAULT_DEVICE}",
 	"workspaceFolder": "/workspace",
@@ -36,7 +36,8 @@
 				"ms-python.python",
 				"eamodio.gitlens",
 				"njpwerner.autodocstring",
-				"ms-azuretools.vscode-docker"
+				"ms-azuretools.vscode-docker",
+				"ms-vscode.makefile-tools"
 			]
 		}
 	},
