@@ -1,54 +1,34 @@
 services:
     sensehat-dsp-core:
-        image: ${CORE_IMAGE}
+        image: sensehat-dsp-core
         container_name: sensehat-dsp-core
         network_mode: host
         build:
             context: .
-            dockerfile: ./build/core/Dockerfile
+            dockerfile: ./docker/core/Dockerfile
             args:
-                - PYTHON_VERSION=${PYTHON_VERSION}
-                - PIP_VERSION=${PIP_VERSION}
-                - RTIMULIB_VERSION=${RTIMULIB_VERSION}
-                - SENSEHAT_VERSION=${SENSEHAT_VERSION}
+                - PYTHON_VERSION
+                - UV_VERSION
+                - RTIMULIB_VERSION
+                - SENSEHAT_VERSION
         volumes:
-            - $PWD/${SRC_VOLUME_MOUNT}
-            - $PWD/${NOTEBOOKS_VOLUME_MOUNT}
-            - $PWD/${RESOURCES_VOLUME_MOUNT}
+            - $PWD/resources:/resources
+            - $PWD/notebooks:/notebooks
         env_file:
             - .env
-        privileged: true
-
-    sensehat-dsp-jupyter:
-        image: ${JUPYTER_IMAGE}
-        container_name: sensehat-dsp-jupyter
-        network_mode: host
-        build:
-            context: .
-            dockerfile: ./build/jupyter/Dockerfile
-            args:
-                - CORE_IMAGE=${CORE_IMAGE}
-        volumes:
-            - $PWD/${SRC_VOLUME_MOUNT}
-            - $PWD/${NOTEBOOKS_VOLUME_MOUNT}
-            - $PWD/${RESOURCES_VOLUME_MOUNT}
-        env_file:
-            - .env
+            - .secrets/.env
         privileged: true
 
     sensehat-dsp-api:
-        image: ${API_IMAGE}
+        image: sensehat-dsp-api
         container_name: sensehat-dsp-api
         network_mode: host
         build:
             context: .
-            dockerfile: ./build/api/Dockerfile
-            args:
-                - CORE_IMAGE=${CORE_IMAGE}
+            dockerfile: ./docker/api/Dockerfile
         volumes:
-            - $PWD/${SRC_VOLUME_MOUNT}
-            - $PWD/${NOTEBOOKS_VOLUME_MOUNT}
-            - $PWD/${RESOURCES_VOLUME_MOUNT}
+            - $PWD/resources:/resources
         env_file:
             - .env
+            - .secrets/.env
         privileged: true

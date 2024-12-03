@@ -1,0 +1,3 @@
+pydantic==2.10.2
+
+common @ git+https://git@github.com/aureka-team/common.git@v1.1.2

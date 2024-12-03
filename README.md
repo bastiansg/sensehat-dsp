@@ -1,1 +1,1 @@
-# sensehat-dsp
+# sensehat-dsp (Sense HAT Display)

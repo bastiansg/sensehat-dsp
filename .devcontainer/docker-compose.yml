@@ -6,7 +6,14 @@ services:
         build:
             context: ..
             dockerfile: .devcontainer/Dockerfile
+            args:
+                - DEVCONTAINER_USER
         volumes:
             - ..:/workspace:cached
-        # Please do not comment or remove this line!
-        command: /bin/sh -c "while sleep 1000; do :; done"
+            - ../resources/:/resources
+        env_file:
+            - ../.env
+            - ../.secrets/.env
+        privileged: true
+        # This keeps the devcontainer running.
+        entrypoint: [ "tail", "-f", "/dev/null" ]
