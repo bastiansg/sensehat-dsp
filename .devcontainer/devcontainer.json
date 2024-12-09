@@ -1,5 +1,5 @@
 {
-    "name": "rage",
+    "name": "sensehat-dsp",
     "initializeCommand": "make core-build",
     "dockerComposeFile": "docker-compose.yml",
     "service": "sensehat-dsp-devcontainer",
@@ -7,6 +7,7 @@
     "customizations": {
         "vscode": {
             "settings": {
+                "python.locator": "js",
                 "extensions.verifySignature": false,
                 "files.trimFinalNewlines": true,
                 "files.trimTrailingWhitespace": true,
@@ -34,7 +35,6 @@
                 "esbenp.prettier-vscode",
                 "eamodio.gitlens",
                 "ms-azuretools.vscode-docker",
-                "ms-toolsai.jupyter",
                 "tamasfe.even-better-toml",
                 "christian-kohler.path-intellisense"
             ]

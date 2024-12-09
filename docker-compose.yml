@@ -13,7 +13,6 @@ services:
                 - SENSEHAT_VERSION
         volumes:
             - $PWD/resources:/resources
-            - $PWD/notebooks:/notebooks
         env_file:
             - .env
             - .secrets/.env

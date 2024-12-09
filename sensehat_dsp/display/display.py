@@ -1,96 +1,122 @@
 import numpy as np
 
-from time import sleep
+from pydantic import (
+    BaseModel,
+    StrictStr,
+    NonNegativeInt,
+    Field,
+)
+
+# from time import sleep
+from typing import Callable, TypeVar, Any
+
 from sense_hat import SenseHat
 from threading import Thread, Lock
 
-from sensehat_dsp.logger import get_logger
-from sensehat_dsp.meta.data_models import Image, IntermittentImage
+from common.logger import get_logger
+# from sensehat_dsp.meta.data_models import Image, IntermittentImage
 
-from .utils import next_color
-from .dsp_images import dsp_images
+# from .utils import next_color
+# from .dsp_images import dsp_images
 
 
 logger = get_logger(__name__)
 
 
-class Display(SenseHat):
+F = TypeVar("F", bound=Callable[..., None])
+
+
+def threaded(func: Callable[..., None]) -> Callable[..., None]:
+    def wrapper(*args: Any, **kwargs: Any) -> None:
+        thread = Thread(target=func, args=args, kwargs=kwargs)
+        thread.daemon = True
+        thread.start()
+
+    return wrapper
+
+
+# TODO: Validate image, d_color and l_color values.
+class Image(BaseModel):
+    name: StrictStr
+    image: list[NonNegativeInt] = Field(len=64)
+    d_color: list[NonNegativeInt] = Field(len=3)
+    l_color: list[NonNegativeInt] = Field(len=3)
+
+
+class Display:
     def __init__(
         self,
+        sense_hat: SenseHat,
+        images: list[Image],
         initial_rotation: int = 180,
     ):
-        SenseHat.__init__(self)
+        self.sense_hat = sense_hat
+        self.images = images
+        self.initial_rotation = initial_rotation
+
+        self.clear()
         self.mutex = Lock()
-        self.set_rotation(initial_rotation)
+        self.image_map = self.get_image_map(images=images)
 
-        logger.info("loading images")
-        self.load_images()
-        self.reset()
-
-    def reset(self):
+    def clear(self) -> None:
         self.intermittent_image_run = False
         self.color_cycle_run = False
-        self.clear()
 
-    def parse_raw_image(self, raw_image: dict) -> np.ndarray:
-        parsed_image = [
-            raw_image["d-color"] if pixel else raw_image["l-color"]
-            for pixel in raw_image["image"]
-        ]
+        self.sense_hat.clear()
+        self.sense_hat.set_rotation(self.initial_rotation)
 
-        parsed_image = np.array(parsed_image)
-        return parsed_image
-
-    def load_images(self):
-        self.images = {
-            dsp_image["name"]: self.parse_raw_image(dsp_image)
-            for dsp_image in dsp_images
-        }
-
-    def color_cycle(self, image: Image):
-        self.mutex.acquire()
-        r, g, b = (255, 0, 0)
-        image_mask = self.images[image.name]
-        image_mask[image_mask > 0] = 1
-        while self.color_cycle_run:
-            r, g, b = next_color(r, g, b)
-            image = image_mask * [r, g, b]
-            self.set_pixels(image)
-
-        self.clear()
-        self.mutex.release()
-
-    def intermittent_image(self, int_image: IntermittentImage):
-        self.mutex.acquire()
-        while self.intermittent_image_run:
-            self.set_pixels(self.images[int_image.name])
-            sleep(int_image.refresh_rate)
-            self.clear()
-            sleep(int_image.refresh_rate)
-
-        self.mutex.release()
-
-    def start_intermittent_image(self, int_image: IntermittentImage):
-        self.intermittent_image_run = True
-        thread = Thread(
-            target=self.intermittent_image,
-            args=(int_image,),
+    def get_np_image(self, image: Image) -> np.ndarray:
+        return np.array(
+            [image.d_color if pixel else image.l_color for pixel in image.image]
         )
 
-        thread.start()
+    def get_image_map(self, images: list[Image]) -> dict:
+        return {image.name: self.get_np_image(image=image) for image in images}
 
-    def stop_intermittent_image(self):
-        self.intermittent_image_run = False
+    # def color_cycle(self, image: Image):
+    #     self.mutex.acquire()
+    #     r, g, b = (255, 0, 0)
+    #     image_mask = self.images[image.name]
+    #     image_mask[image_mask > 0] = 1
+    #     while self.color_cycle_run:
+    #         r, g, b = next_color(r, g, b)
+    #         image = image_mask * [r, g, b]
+    #         self.set_pixels(image)
 
-    def start_color_cycle(self, image: Image):
-        self.color_cycle_run = True
-        thread = Thread(target=self.color_cycle, args=(image,))
-        thread.start()
+    #     self.clear()
+    #     self.mutex.release()
 
-    def stop_color_cycle(self):
-        self.color_cycle_run = False
+    # def intermittent_image(self, int_image: IntermittentImage):
+    #     self.mutex.acquire()
+    #     while self.intermittent_image_run:
+    #         self.set_pixels(self.images[int_image.name])
+    #         sleep(int_image.refresh_rate)
+    #         self.clear()
+    #         sleep(int_image.refresh_rate)
 
-    def set_image(self, image: Image):
+    #     self.mutex.release()
+
+    # def start_intermittent_image(self, int_image: IntermittentImage):
+    #     self.intermittent_image_run = True
+    #     thread = Thread(
+    #         target=self.intermittent_image,
+    #         args=(int_image,),
+    #     )
+
+    #     thread.start()
+
+    # def stop_intermittent_image(self):
+    #     self.intermittent_image_run = False
+
+    # def start_color_cycle(self, image: Image):
+    #     self.color_cycle_run = True
+    #     thread = Thread(target=self.color_cycle, args=(image,))
+    #     thread.start()
+
+    # def stop_color_cycle(self):
+    #     self.color_cycle_run = False
+
+    def set_image(self, image_name: str) -> None:
         self.mutex.acquire()
-        self.set_pixels(self.images[image.name])
+        self.sense_hat.set_pixels(pixel_list=self.image_map[image_name])
         self.mutex.release()

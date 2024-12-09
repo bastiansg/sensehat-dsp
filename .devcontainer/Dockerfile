@@ -11,17 +11,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     && apt-get clean \
     && rm -rf /var/tmp/* /var/lib/apt/lists/*
 
-COPY .devcontainer/requirements.txt .
-RUN uv pip install -r requirements.txt --system
-
-ARG DEVCONTAINER_USER
-RUN useradd -m $DEVCONTAINER_USER \
-    && usermod -aG sudo $DEVCONTAINER_USER \
-    && passwd -d $DEVCONTAINER_USER
+WORKDIR /workspace
 
 ENV SHELL=/usr/bin/zsh
-RUN chsh $DEVCONTAINER_USER -s $SHELL
-
-WORKDIR /workspace
-USER $DEVCONTAINER_USER
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

@@ -6,8 +6,6 @@ services:
         build:
             context: ..
             dockerfile: .devcontainer/Dockerfile
-            args:
-                - DEVCONTAINER_USER
         volumes:
             - ..:/workspace:cached
             - ../resources/:/resources
@@ -16,4 +14,4 @@ services:
             - ../.secrets/.env
         privileged: true
         # This keeps the devcontainer running.
-        entrypoint: [ "tail", "-f", "/dev/null" ]
+        entrypoint: ["tail", "-f", "/dev/null"]
