@@ -5,6 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from routers.set_image import set_image_router
 from routers.clear_image import clear_image_router
+from routers.intermittent_image import (
+    start_intermittent_image_router,
+    stop_intermittent_image_router,
+)
 
 
 logger = get_logger(__name__)
@@ -30,3 +34,5 @@ def healthcheck():
 
 app.include_router(set_image_router)
 app.include_router(clear_image_router)
+app.include_router(start_intermittent_image_router)
+app.include_router(stop_intermittent_image_router)

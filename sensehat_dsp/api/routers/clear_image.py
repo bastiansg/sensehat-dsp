@@ -11,9 +11,10 @@ class ClearImageOutput(BaseModel):
     status: StrictStr
 
 
-@clear_image_router.post("/sensehat_dsp/image/clear")
-async def clear_image() -> ClearImageOutput:
+@clear_image_router.post("/sensehat_dsp/clear")
+async def clear() -> ClearImageOutput:
     dsp = get_display()
+    dsp.stop_intermittent_image()
     dsp.clear()
 
     return ClearImageOutput(status="ok")

@@ -9,9 +9,9 @@
             "module": "fastapi",
             "jinja": true,
             // "justMyCode": false,
-            // "env": {
-            //     "LOG_LEVEL": "debug"
-            // },
+            "env": {
+                "LOG_LEVEL": "debug"
+            },
             "args": ["run", "sensehat_dsp/api/app.py", "--port", "8000"]
         }
     ]
