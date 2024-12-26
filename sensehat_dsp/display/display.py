@@ -85,6 +85,51 @@ class Display:
     def stop_intermittent_image(self):
         self.intermittent_image_run = False
 
+    @threaded
+    def start_slow_intermittent_image(
+        self,
+        image_name: str,
+        colour: tuple[int, int, int],
+        refresh_rate: float = 0.005,
+    ) -> None:
+        self.mutex.acquire()
+
+        image_mask = self.image_map[image_name]
+        image_mask[image_mask > 0] = 1
+
+        init_r, init_g, init_b = colour
+        r = init_r
+        g = init_g
+        b = init_b
+
+        transition_values = []
+        while max((r, g, b)) > 50:
+            r = max((r - 1), 0)
+            g = max((g - 1), 0)
+            b = max((b - 1), 0)
+            transition_values.append((r, g, b))
+
+        self.intermittent_image_run = True
+        while self.intermittent_image_run:
+            self.sense_hat.set_pixels(image_mask * [r, g, b])
+            sleep(refresh_rate)
+
+            for r_, g_, b_ in transition_values:
+                if not self.intermittent_image_run:
+                    continue
+
+                self.sense_hat.set_pixels(image_mask * [r_, g_, b_])
+                sleep(refresh_rate)
+
+            for r_, g_, b_ in reversed(transition_values):
+                if not self.intermittent_image_run:
+                    continue
+
+                self.sense_hat.set_pixels(image_mask * [r_, g_, b_])
+                sleep(refresh_rate)
+
+        self.mutex.release()
+
     def set_image(self, image_name: str) -> None:
         self.mutex.acquire()
         self.sense_hat.set_pixels(pixel_list=self.image_map[image_name])

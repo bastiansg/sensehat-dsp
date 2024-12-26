@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from .utils import get_display
-from .meta import Image, Status
+from .meta import IntermittentImage, Status
 
 
 start_intermittent_image_router = APIRouter()
@@ -12,7 +12,7 @@ stop_intermittent_image_router = APIRouter()
     "/sensehat_dsp/start_intermittent_image",
     tags=["intermittent_image"],
 )
-async def start_intermittent_image(image: Image) -> Status:
+async def start_intermittent_image(image: IntermittentImage) -> Status:
     dsp = get_display()
     dsp.start_intermittent_image(
         image_name=image.name,
