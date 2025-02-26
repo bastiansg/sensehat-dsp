@@ -1,17 +1,11 @@
-ARG CORE_IMAGE
+FROM sensehat-dsp-core
 
-FROM ${CORE_IMAGE}
+COPY sensehat_dsp /src/sensehat_dsp
+COPY requirements.txt pyproject.toml  /src/
+RUN --mount=type=bind,source=.git,target=/src/.git \
+    uv pip install /src --no-deps --system
 
-WORKDIR /tmp
-
-# Install app requirements
-COPY ./build/api/requirements.txt .
-RUN --mount=type=cache,target=/root/.cache \
-    pip install -r requirements.txt
-
-# Clean
-RUN rm -rf /tmp/*
-
-WORKDIR /root/api
-COPY ./api/api.py .
-CMD uvicorn api:app --host 0.0.0.0
+ARG API_PORT
+WORKDIR /src/sensehat_dsp/api
+# CMD ["/bin/bash"]
+CMD fastapi run app.py --port ${API_PORT}

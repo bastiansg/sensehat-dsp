@@ -3,14 +3,16 @@ from fastapi.responses import RedirectResponse
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers.set_image import set_image_router
-from routers.clear_image import clear_image_router
-from routers.intermittent_image import (
+from .routers.set_image import set_image_router
+from .routers.clear_image import clear_image_router
+from .routers.intermittent_image import (
     start_intermittent_image_router,
     stop_intermittent_image_router,
 )
 
-from routers.slow_intermittent_image import start_slow_intermittent_image_router
+from .routers.slow_intermittent_image import (
+    start_slow_intermittent_image_router,
+)
 
 
 logger = get_logger(__name__)

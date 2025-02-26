@@ -1,5 +1,4 @@
 include .env
-
 .PHONY: core-build api-build devcontainer-build
 
 
@@ -14,12 +13,12 @@ core-run:
 api-build: core-build
 	docker compose build sensehat-dsp-api
 
-api-run:
-	docker compose up sensehat-dsp-api
+api-run: api-build
+	docker compose run --rm sensehat-dsp-api
+
+api-up: api-build
+	docker compose up sensehat-dsp-api -d
 
 
 devcontainer-build: core-build
 	docker compose -f .devcontainer/docker-compose.yml build sensehat-dsp-devcontainer
-
-devcontainer-run:
-	docker compose -f .devcontainer/docker-compose.yml run sensehat-dsp-devcontainer
