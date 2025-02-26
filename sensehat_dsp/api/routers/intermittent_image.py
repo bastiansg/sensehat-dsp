@@ -29,5 +29,6 @@ async def start_intermittent_image(image: IntermittentImage) -> Status:
 async def stop_intermittent_image() -> Status:
     dsp = get_display()
     dsp.stop_intermittent_image()
+    dsp.clear()
 
     return Status(status="ok")

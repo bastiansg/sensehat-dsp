@@ -7,5 +7,4 @@ RUN --mount=type=bind,source=.git,target=/src/.git \
 
 ARG API_PORT
 WORKDIR /src/sensehat_dsp/api
-# CMD ["/bin/bash"]
 CMD fastapi run app.py --port ${API_PORT}
