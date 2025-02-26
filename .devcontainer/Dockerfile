@@ -6,10 +6,14 @@ RUN --mount=type=cache,target=/var/cache/apt \
     vim \
     htop \
     zsh \
-    sudo \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/tmp/* /var/lib/apt/lists/*
+
+COPY .devcontainer/requirements.txt .
+RUN uv pip install -r requirements.txt --system
+
+RUN rm -rf /tmp/*
 
 WORKDIR /workspace
 

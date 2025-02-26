@@ -15,6 +15,8 @@ from typing import Callable, TypeVar, Any
 
 from common.logger import get_logger
 
+from .utils import next_color
+
 
 logger = get_logger(__name__)
 
@@ -128,6 +130,20 @@ class Display:
                 self.sense_hat.set_pixels(image_mask * [r_, g_, b_])
                 sleep(refresh_rate)
 
+        self.mutex.release()
+
+    @threaded
+    def start_color_cycle(self, image_name: str):
+        self.mutex.acquire()
+        r, g, b = (255, 0, 0)
+        image_mask = self.image_map[image_name]
+        image_mask[image_mask > 0] = 1
+        while True:
+            r, g, b = next_color(r, g, b)
+            self.sense_hat.set_pixels(image_mask * [r, g, b])
+            sleep(0.001)
+
+        self.clear()
         self.mutex.release()
 
     def set_image(self, image_name: str) -> None:

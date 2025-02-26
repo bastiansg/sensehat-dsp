@@ -13,10 +13,10 @@ start_slow_intermittent_image_router = APIRouter()
 )
 async def start_slow_intermittent_image(image: SlowIntermittentImage) -> Status:
     dsp = get_display()
-    dsp.start_slow_intermittent_image(
+    dsp.start_color_cycle(
         image_name=image.name,
-        colour=image.colour,
-        refresh_rate=image.refresh_rate,
+        # colour=image.colour,
+        # refresh_rate=image.refresh_rate,
     )
 
     return Status(status="ok")
