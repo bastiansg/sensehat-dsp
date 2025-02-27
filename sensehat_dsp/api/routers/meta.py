@@ -1,6 +1,6 @@
 from typing import Literal
 from fastapi import APIRouter
-from pydantic import BaseModel, Field, StrictStr, PositiveFloat
+from pydantic import BaseModel, Field, StrictStr, NonNegativeFloat
 
 
 set_image_router = APIRouter()
@@ -18,11 +18,11 @@ class DisplayImage(BaseModel):
         "left-arrow",
         "right-arrow",
     ] = Field(examples=["space-invader-1"])
-    refresh_rate: PositiveFloat = 1.0
+    refresh_rate: NonNegativeFloat = 1.0
 
 
 class ColorCycleImage(DisplayImage):
-    refresh_rate: PositiveFloat = 0.001
+    refresh_rate: NonNegativeFloat = 0.001
 
 
 class Status(BaseModel):
