@@ -1,3 +1,3 @@
 #!/bin/env sh
 
-uv pip install -e . --no-deps --system
+uv pip install -e . --no-deps

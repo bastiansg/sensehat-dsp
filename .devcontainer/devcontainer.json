@@ -7,8 +7,6 @@
     "customizations": {
         "vscode": {
             "settings": {
-                "python.pythonPath": "/workspace", // FIXME
-                "python.locator": "js",
                 "extensions.verifySignature": false,
                 "files.trimFinalNewlines": true,
                 "files.trimTrailingWhitespace": true,

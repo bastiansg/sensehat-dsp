@@ -1,12 +1,12 @@
 from typing import Literal
 from fastapi import APIRouter
-from pydantic import BaseModel, Field, StrictStr, PositiveFloat, NonNegativeInt
+from pydantic import BaseModel, Field, StrictStr, PositiveFloat
 
 
 set_image_router = APIRouter()
 
 
-class Image(BaseModel):
+class DisplayImage(BaseModel):
     name: Literal[
         "space-invader-1",
         "space-invader-1a",
@@ -18,19 +18,11 @@ class Image(BaseModel):
         "left-arrow",
         "right-arrow",
     ] = Field(examples=["space-invader-1"])
-
-
-class IntermittentImage(Image):
     refresh_rate: PositiveFloat = 1.0
 
 
-class SlowIntermittentImage(Image):
-    refresh_rate: PositiveFloat = 0.005
-    colour: tuple[NonNegativeInt, NonNegativeInt, NonNegativeInt] = (
-        128,
-        0,
-        255,
-    )
+class ColorCycleImage(DisplayImage):
+    refresh_rate: PositiveFloat = 0.001
 
 
 class Status(BaseModel):

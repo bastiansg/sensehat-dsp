@@ -16,6 +16,7 @@ from typing import Callable, TypeVar, Any
 from common.logger import get_logger
 
 from .utils import next_color
+from .dsp_images import dsp_images
 
 
 logger = get_logger(__name__)
@@ -44,15 +45,17 @@ class Image(BaseModel):
 class Display:
     def __init__(
         self,
-        sense_hat: SenseHat,
-        images: list[Image],
+        images: list[Image] = dsp_images,
         initial_rotation: int = 180,
     ):
-        self.sense_hat = sense_hat
+        self.sense_hat = SenseHat()
         self.initial_rotation = initial_rotation
 
         self.clear()
         self.mutex = Lock()
+        self.is_active = False
+
+        images = [Image(**img) for img in images]
         self.image_map = self.get_image_map(images=images)
 
     def clear(self) -> None:
@@ -74,9 +77,9 @@ class Display:
         refresh_rate: float,
     ) -> None:
         self.mutex.acquire()
+        self.is_active = True
 
-        self.intermittent_image_run = True
-        while self.intermittent_image_run:
+        while self.is_active:
             self.sense_hat.set_pixels(self.image_map[image_name])
             sleep(refresh_rate)
             self.clear()
@@ -84,66 +87,28 @@ class Display:
 
         self.mutex.release()
 
-    def stop_intermittent_image(self):
-        self.intermittent_image_run = False
-
     @threaded
-    def start_slow_intermittent_image(
+    def start_color_cycle(
         self,
         image_name: str,
-        colour: tuple[int, int, int],
-        refresh_rate: float = 0.005,
+        refresh_rate: float = 0.001,
     ) -> None:
         self.mutex.acquire()
+        r, g, b = (255, 0, 0)
+        image = self.image_map[image_name]
+        image_mask = np.array(
+            [
+                [1, 1, 1] if value > 0 else [0, 0, 0]
+                for value in np.sum(image, axis=1)
+            ]
+        )
 
-        image_mask = self.image_map[image_name]
-        image_mask[image_mask > 0] = 1
-
-        init_r, init_g, init_b = colour
-        r = init_r
-        g = init_g
-        b = init_b
-
-        transition_values = []
-        while max((r, g, b)) > 50:
-            r = max((r - 1), 0)
-            g = max((g - 1), 0)
-            b = max((b - 1), 0)
-            transition_values.append((r, g, b))
-
-        self.intermittent_image_run = True
-        while self.intermittent_image_run:
+        self.is_active = True
+        while self.is_active:
+            r, g, b = next_color(r, g, b)
             self.sense_hat.set_pixels(image_mask * [r, g, b])
             sleep(refresh_rate)
 
-            for r_, g_, b_ in transition_values:
-                if not self.intermittent_image_run:
-                    continue
-
-                self.sense_hat.set_pixels(image_mask * [r_, g_, b_])
-                sleep(refresh_rate)
-
-            for r_, g_, b_ in reversed(transition_values):
-                if not self.intermittent_image_run:
-                    continue
-
-                self.sense_hat.set_pixels(image_mask * [r_, g_, b_])
-                sleep(refresh_rate)
-
-        self.mutex.release()
-
-    @threaded
-    def start_color_cycle(self, image_name: str):
-        self.mutex.acquire()
-        r, g, b = (255, 0, 0)
-        image_mask = self.image_map[image_name]
-        image_mask[image_mask > 0] = 1
-        while True:
-            r, g, b = next_color(r, g, b)
-            self.sense_hat.set_pixels(image_mask * [r, g, b])
-            sleep(0.001)
-
-        self.clear()
         self.mutex.release()
 
     def set_image(self, image_name: str) -> None:

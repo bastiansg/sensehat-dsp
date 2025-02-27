@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 requires-python = ">=3.11"
-name = "sensehat_dps"
+name = "sensehat_dsp"
 dynamic = ["version", "dependencies"]
 description = "Sense HAT Display"
 readme = "README.md"
@@ -17,7 +17,7 @@ classifiers = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["sensehat_dps"]
+include = ["sensehat_dsp"]
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
@@ -25,4 +25,4 @@ dependencies = { file = ["requirements.txt"] }
 [tool.setuptools_scm]
 
 [tool.setuptools.package-data]
-"sensehat_dps" = ["conf/*"]
+"sensehat_dsp" = ["conf/*"]

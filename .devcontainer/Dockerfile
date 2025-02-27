@@ -10,6 +10,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     && apt-get clean \
     && rm -rf /var/tmp/* /var/lib/apt/lists/*
 
+WORKDIR /tmp
+
 COPY .devcontainer/requirements.txt .
 RUN uv pip install -r requirements.txt --system
 
