@@ -9,8 +9,6 @@ services:
             args:
                 - PYTHON_VERSION
                 - UV_VERSION
-                - RTIMULIB_VERSION
-                - SENSEHAT_VERSION
         volumes:
             - $PWD/resources:/resources
         env_file:
