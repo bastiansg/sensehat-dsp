@@ -16,7 +16,7 @@ from typing import Callable, TypeVar, Any
 from common.logger import get_logger
 
 from .utils import next_color
-from .dsp_images import dsp_images
+from .dsp_images import dsp_images, ImageName
 
 
 logger = get_logger(__name__)
@@ -25,6 +25,7 @@ logger = get_logger(__name__)
 F = TypeVar("F", bound=Callable[..., None])
 
 
+# TODO: Move this fucntion to common
 def threaded(func: Callable[..., None]) -> Callable[..., None]:
     def wrapper(*args: Any, **kwargs: Any) -> None:
         thread = Thread(target=func, args=args, kwargs=kwargs)
@@ -62,18 +63,22 @@ class Display:
         self.sense_hat.clear()
         self.sense_hat.set_rotation(self.initial_rotation)
 
-    def get_np_image(self, image: Image) -> np.ndarray:
+    @staticmethod
+    def get_np_image(image: Image) -> np.ndarray:
         return np.array(
             [image.d_color if pixel else image.l_color for pixel in image.image]
         )
 
-    def get_image_map(self, images: list[Image]) -> dict:
-        return {image.name: self.get_np_image(image=image) for image in images}
+    @staticmethod
+    def get_image_map(images: list[Image]) -> dict:
+        return {
+            image.name: Display.get_np_image(image=image) for image in images
+        }
 
     @threaded
     def start_intermittent_image(
         self,
-        image_name: str,
+        image_name: ImageName,
         refresh_rate: float,
     ) -> None:
         self.mutex.acquire()
@@ -90,7 +95,7 @@ class Display:
     @threaded
     def start_color_cycle(
         self,
-        image_name: str,
+        image_name: ImageName,
         refresh_rate: float = 0.001,
     ) -> None:
         self.mutex.acquire()

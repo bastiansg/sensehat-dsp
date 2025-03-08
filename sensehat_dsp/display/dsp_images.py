@@ -1,3 +1,19 @@
+from typing import Literal
+
+
+ImageName = Literal[
+    "space-invader-1",
+    "space-invader-1a",
+    "space-invader-1b",
+    "space-invader-2",
+    "space-invader-3",
+    "space-invader-4",
+    "space-invader-5",
+    "left-arrow",
+    "right-arrow",
+]
+
+
 # fmt: off
 dsp_images = [
     {
