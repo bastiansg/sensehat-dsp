@@ -1,5 +1,5 @@
 pydantic==2.10.6
-fastapi[standard]==0.115.8
+fastapi[standard]==0.115.11
 uvicorn==0.34.0
 
 common @ git+https://git@github.com/aureka-team/common.git@v1.1.2
