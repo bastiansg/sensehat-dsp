@@ -13,6 +13,7 @@ from sense_hat import SenseHat
 from threading import Thread, Lock
 from typing import Callable, TypeVar, Any
 
+from sensehat_dsp.gol import GOL
 from common.logger import get_logger
 
 from .utils import next_color
@@ -35,12 +36,17 @@ def threaded(func: Callable[..., None]) -> Callable[..., None]:
     return wrapper
 
 
-# TODO: Validate image, d_color and l_color values.
+class Color(BaseModel):
+    r: NonNegativeInt = Field(le=255, default=255)
+    g: NonNegativeInt = Field(le=255, default=255)
+    b: NonNegativeInt = Field(le=255, default=255)
+
+
 class Image(BaseModel):
     name: StrictStr
     image: list[NonNegativeInt] = Field(len=64)
-    d_color: list[NonNegativeInt] = Field(len=3)
-    l_color: list[NonNegativeInt] = Field(len=3)
+    p_color: Color = Field(description="Primary color.")
+    s_color: Color = Field(description="Secundary color.")
 
 
 class Display:
@@ -59,6 +65,8 @@ class Display:
         images = [Image(**img) for img in images]
         self.image_map = self.get_image_map(images=images)
 
+        self.gol = GOL()
+
     def clear(self) -> None:
         self.sense_hat.clear()
         self.sense_hat.set_rotation(self.initial_rotation)
@@ -66,7 +74,20 @@ class Display:
     @staticmethod
     def get_np_image(image: Image) -> np.ndarray:
         return np.array(
-            [image.d_color if pixel else image.l_color for pixel in image.image]
+            [
+                [
+                    image.p_color.r,
+                    image.p_color.g,
+                    image.p_color.b,
+                ]
+                if pixel
+                else [
+                    image.s_color.r,
+                    image.s_color.g,
+                    image.s_color.b,
+                ]
+                for pixel in image.image
+            ]
         )
 
     @staticmethod
@@ -96,7 +117,7 @@ class Display:
     def start_color_cycle(
         self,
         image_name: ImageName,
-        refresh_rate: float = 0.001,
+        refresh_rate: float = 0.01,
     ) -> None:
         self.mutex.acquire()
         r, g, b = (255, 0, 0)
@@ -112,6 +133,30 @@ class Display:
         while self.is_active:
             r, g, b = next_color(r, g, b)
             self.sense_hat.set_pixels(image_mask * [r, g, b])
+            sleep(refresh_rate)
+
+        self.mutex.release()
+
+    @threaded
+    def start_gol(
+        self,
+        p_color: Color,
+        s_color: Color,
+        refresh_rate: int = 2,
+    ) -> None:
+        self.mutex.acquire()
+        gol_grids = self.gol.get_grids()
+
+        self.is_active = True
+        while self.is_active:
+            image = Image(
+                name="gol",
+                image=next(gol_grids).squeeze().flatten().int().tolist(),
+                p_color=p_color,
+                s_color=s_color,
+            )
+
+            self.sense_hat.set_pixels(pixel_list=self.get_np_image(image=image))
             sleep(refresh_rate)
 
         self.mutex.release()
