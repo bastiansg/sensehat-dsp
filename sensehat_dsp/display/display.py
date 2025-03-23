@@ -54,9 +54,11 @@ class Display:
         self,
         images: list[Image] = dsp_images,
         initial_rotation: int = 180,
+        refresh_rate: float = 1.0,
     ):
         self.sense_hat = SenseHat()
         self.initial_rotation = initial_rotation
+        self.refresh_rate = refresh_rate
 
         self.clear()
         self.mutex = Lock()
@@ -100,28 +102,20 @@ class Display:
         }
 
     @threaded
-    def start_intermittent_image(
-        self,
-        image_name: ImageName,
-        refresh_rate: float,
-    ) -> None:
+    def start_intermittent_image(self, image_name: ImageName) -> None:
         self.mutex.acquire()
         self.is_active = True
 
         while self.is_active:
             self.sense_hat.set_pixels(self.image_map[image_name])
-            sleep(refresh_rate)
+            sleep(self.refresh_rate)
             self.clear()
-            sleep(refresh_rate)
+            sleep(self.refresh_rate)
 
         self.mutex.release()
 
     @threaded
-    def start_color_cycle(
-        self,
-        image_name: ImageName,
-        refresh_rate: float = 0.01,
-    ) -> None:
+    def start_color_cycle(self, image_name: ImageName) -> None:
         self.mutex.acquire()
         r, g, b = (255, 0, 0)
         image = self.image_map[image_name]
@@ -136,17 +130,12 @@ class Display:
         while self.is_active:
             r, g, b = next_color(r, g, b)
             self.sense_hat.set_pixels(image_mask * [r, g, b])
-            sleep(refresh_rate)
+            sleep(self.refresh_rate)
 
         self.mutex.release()
 
     @threaded
-    def start_gol(
-        self,
-        p_color: Color,
-        s_color: Color,
-        refresh_rate: int = 2,
-    ) -> None:
+    def start_gol(self, p_color: Color, s_color: Color) -> None:
         self.mutex.acquire()
         gol_grids = self.gol.get_grids()
 
@@ -160,7 +149,7 @@ class Display:
             )
 
             self.sense_hat.set_pixels(pixel_list=self.get_np_image(image=image))
-            sleep(refresh_rate)
+            sleep(self.refresh_rate)
 
         self.mutex.release()
 
