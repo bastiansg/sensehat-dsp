@@ -67,6 +67,9 @@ class Display:
 
         self.gol = GOL()
 
+    def stop(self) -> None:
+        self.is_active = False
+
     def clear(self) -> None:
         self.sense_hat.clear()
         self.sense_hat.set_rotation(self.initial_rotation)
