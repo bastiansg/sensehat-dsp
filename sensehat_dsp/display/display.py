@@ -8,7 +8,6 @@ from pydantic import (
     Field,
 )
 
-
 from sense_hat import SenseHat
 from threading import Thread, Lock
 from typing import Callable, TypeVar, Any
@@ -54,6 +53,7 @@ class Display:
         self,
         images: list[Image] = dsp_images,
         initial_rotation: int = 180,
+        refresh_rate: float = 1.0,
     ):
         self.sense_hat = SenseHat()
         self.initial_rotation = initial_rotation
@@ -66,7 +66,7 @@ class Display:
         self.image_map = self.get_image_map(images=images)
 
         self.gol = GOL()
-        self.gol_refresh_rate = None
+        self.refresh_rate = refresh_rate
 
     def stop(self) -> None:
         self.is_active = False
@@ -107,13 +107,14 @@ class Display:
         refresh_rate: float = 0.5,
     ) -> None:
         self.mutex.acquire()
-        self.is_active = True
 
+        self.refresh_rate = refresh_rate
+        self.is_active = True
         while self.is_active:
             self.sense_hat.set_pixels(self.image_map[image_name])
-            sleep(refresh_rate)
+            sleep(self.refresh_rate)
             self.clear()
-            sleep(refresh_rate)
+            sleep(self.refresh_rate)
 
         self.mutex.release()
 
@@ -133,11 +134,12 @@ class Display:
             ]
         )
 
+        self.refresh_rate = refresh_rate
         self.is_active = True
         while self.is_active:
             r, g, b = next_color(r, g, b)
             self.sense_hat.set_pixels(image_mask * [r, g, b])
-            sleep(refresh_rate)
+            sleep(self.refresh_rate)
 
         self.mutex.release()
 
@@ -151,7 +153,7 @@ class Display:
         self.mutex.acquire()
         gol_grids = self.gol.get_grids()
 
-        self.gol_refresh_rate = refresh_rate
+        self.refresh_rate = refresh_rate
         self.is_active = True
         while self.is_active:
             image = Image(
@@ -162,7 +164,7 @@ class Display:
             )
 
             self.sense_hat.set_pixels(pixel_list=self.get_np_image(image=image))
-            sleep(self.gol_refresh_rate)
+            sleep(self.refresh_rate)
 
         self.mutex.release()
 
