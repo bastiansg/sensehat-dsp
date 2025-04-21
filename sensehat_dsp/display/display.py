@@ -66,6 +66,7 @@ class Display:
         self.image_map = self.get_image_map(images=images)
 
         self.gol = GOL()
+        self.gol_refresh_rate = None
 
     def stop(self) -> None:
         self.is_active = False
@@ -150,6 +151,7 @@ class Display:
         self.mutex.acquire()
         gol_grids = self.gol.get_grids()
 
+        self.gol_refresh_rate = refresh_rate
         self.is_active = True
         while self.is_active:
             image = Image(
@@ -160,7 +162,7 @@ class Display:
             )
 
             self.sense_hat.set_pixels(pixel_list=self.get_np_image(image=image))
-            sleep(refresh_rate)
+            sleep(self.gol_refresh_rate)
 
         self.mutex.release()
 
