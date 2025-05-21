@@ -1,9 +1,7 @@
-include .env
 .PHONY: core-build api-build devcontainer-build
 
 
 core-build:
-	[ -e .secrets/.env ] || touch .secrets/.env
 	docker compose build sensehat-dsp-core
 
 core-run:

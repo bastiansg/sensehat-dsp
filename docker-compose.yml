@@ -2,32 +2,33 @@ services:
     sensehat-dsp-core:
         image: sensehat-dsp-core
         container_name: sensehat-dsp-core
-        network_mode: host
         build:
             context: .
             dockerfile: ./docker/core/Dockerfile
         volumes:
             - $PWD/resources:/resources
-        env_file:
-            - .env
-            - .secrets/.env
         privileged: true
+        networks:
+            - sensehat-dsp
 
     sensehat-dsp-api:
         image: sensehat-dsp-api
         container_name: sensehat-dsp-api
-        network_mode: host
         build:
             context: .
             dockerfile: ./docker/api/Dockerfile
             args:
-                - 8000
+                - "8000"
         volumes:
             - $PWD/resources:/resources
-        env_file:
-            - .env
-            - .secrets/.env
         restart: unless-stopped
         ports:
             - 8000:8000
         privileged: true
+        networks:
+            - sensehat-dsp
+
+networks:
+    sensehat-dsp:
+        name: sensehat-dsp
+        driver: bridge

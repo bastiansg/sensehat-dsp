@@ -1,6 +1,5 @@
 services:
     sensehat-dsp-devcontainer:
-        network_mode: host
         image: sensehat-dsp-devcontainer
         container_name: sensehat-dsp-devcontainer
         build:
@@ -9,9 +8,13 @@ services:
         volumes:
             - ..:/workspace:cached
             - ../resources/:/resources
-        env_file:
-            - ../.env
-            - ../.secrets/.env
         privileged: true
         # This keeps the devcontainer running.
         entrypoint: ["tail", "-f", "/dev/null"]
+        networks:
+            - sensehat-dsp
+
+networks:
+    sensehat-dsp:
+        name: sensehat-dsp
+        driver: bridge
