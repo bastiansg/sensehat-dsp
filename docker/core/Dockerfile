@@ -36,10 +36,8 @@ COPY --from=uv_source /uv /uvx /bin/
 WORKDIR /tmp
 
 COPY ./requirements.txt requirements.txt
-RUN --mount=type=ssh \
-    mkdir -p -m 0600 ~/.ssh \
-    && ssh-keyscan github.com >> ~/.ssh/known_hosts \
-    && uv pip install -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache \
+    uv pip install -r requirements.txt
 
 RUN rm -rf /tmp/*
 WORKDIR /root
