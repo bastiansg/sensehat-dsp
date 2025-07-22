@@ -8,8 +8,8 @@ from pydantic import (
     Field,
 )
 
-from threading import Lock
 from sense_hat import SenseHat
+from threading import Lock, Event
 
 from sensehat_dsp.gol import GOL
 from common.logger import get_logger
@@ -45,55 +45,35 @@ class Display:
 
         self.clear()
         self.mutex = Lock()
-        self.is_active = False
+        self.stop_event = Event()
 
         self.gol = GOL()
         self.refresh_rate = refresh_rate
 
     def stop(self) -> None:
-        self.is_active = False
+        self.stop_event.set()
+        sleep(0.01)
 
     def clear(self) -> None:
         self.sense_hat.clear()
         self.sense_hat.set_rotation(self.initial_rotation)
 
     @staticmethod
-    def get_np_image(image: Image) -> np.ndarray:
-        return np.array(
+    def get_pixel_list(image: Image) -> list[list[int]]:
+        return [
             [
-                [
-                    image.p_color.r,
-                    image.p_color.g,
-                    image.p_color.b,
-                ]
-                if pixel
-                else [
-                    image.s_color.r,
-                    image.s_color.g,
-                    image.s_color.b,
-                ]
-                for pixel in image.image
+                image.p_color.r,
+                image.p_color.g,
+                image.p_color.b,
             ]
-        )
-
-    @threaded
-    def start_intermittent_image(
-        self,
-        image: Image,
-        refresh_rate: float = 0.5,
-    ) -> None:
-        self.mutex.acquire()
-
-        np_image = self.get_np_image(image=image)
-        self.refresh_rate = refresh_rate
-        self.is_active = True
-        while self.is_active:
-            self.sense_hat.set_pixels(np_image)
-            sleep(self.refresh_rate)
-            self.clear()
-            sleep(self.refresh_rate)
-
-        self.mutex.release()
+            if pixel
+            else [
+                image.s_color.r,
+                image.s_color.g,
+                image.s_color.b,
+            ]
+            for pixel in image.image
+        ]
 
     @threaded
     def start_color_cycle(
@@ -101,24 +81,19 @@ class Display:
         image: Image,
         refresh_rate: float = 0.001,
     ) -> None:
-        self.mutex.acquire()
-        r, g, b = (255, 0, 0)
-        np_image = self.get_np_image(image=image)
-        image_mask = np.array(
-            [
-                [1, 1, 1] if value > 0 else [0, 0, 0]
-                for value in np.sum(np_image, axis=1)
-            ]
-        )
+        with self.mutex:
+            self.stop_event.clear()
 
-        self.refresh_rate = refresh_rate
-        self.is_active = True
-        while self.is_active:
-            r, g, b = next_color(r, g, b)
-            self.sense_hat.set_pixels(image_mask * [r, g, b])
-            sleep(self.refresh_rate)
+            r, g, b = (255, 0, 0)
+            image_mask = np.array(
+                [[1, 1, 1] if pixel else [0, 0, 0] for pixel in image.image]
+            )
 
-        self.mutex.release()
+            self.refresh_rate = refresh_rate
+            while not self.stop_event.is_set():
+                r, g, b = next_color(r, g, b)
+                self.sense_hat.set_pixels(image_mask * [r, g, b])
+                self.stop_event.wait(refresh_rate)
 
     @threaded
     def start_gol(
@@ -127,23 +102,24 @@ class Display:
         s_color: Color,
         refresh_rate: float = 0.5,
     ) -> None:
-        self.mutex.acquire()
-        gol_grids = self.gol.get_grids()
+        with self.mutex:
+            self.stop_event.clear()
 
-        self.refresh_rate = refresh_rate
-        self.is_active = True
-        while self.is_active:
-            image = Image(
-                name="gol",
-                image=next(gol_grids).squeeze().flatten().int().tolist(),
-                p_color=p_color,
-                s_color=s_color,
-            )
+            gol_grids = self.gol.get_grids()
+            self.refresh_rate = refresh_rate
+            while not self.stop_event.is_set():
+                image = Image(
+                    name="gol",
+                    image=next(gol_grids).squeeze().flatten().int().tolist(),
+                    p_color=p_color,
+                    s_color=s_color,
+                )
 
-            self.sense_hat.set_pixels(pixel_list=self.get_np_image(image=image))
-            sleep(self.refresh_rate)
+                self.sense_hat.set_pixels(
+                    pixel_list=self.get_pixel_list(image=image)
+                )
 
-        self.mutex.release()
+                self.stop_event.wait(refresh_rate)
 
     @threaded
     def start_image_sequence(
@@ -151,19 +127,23 @@ class Display:
         images: list[Image],
         refresh_rate: float = 0.5,
     ) -> None:
-        self.mutex.acquire()
-        self.refresh_rate = refresh_rate
-        self.is_active = True
-        while self.is_active:
-            for image in images:
-                np_image = self.get_np_image(image=image)
-                self.sense_hat.set_pixels(np_image)
-                sleep(self.refresh_rate)
+        with self.mutex:
+            self.stop_event.clear()
 
-        self.mutex.release()
+            self.refresh_rate = refresh_rate
+            while not self.stop_event.is_set():
+                for image in images:
+                    if self.stop_event.is_set():
+                        break
+
+                    self.sense_hat.set_pixels(
+                        pixel_list=self.get_pixel_list(image=image)
+                    )
+
+                    self.stop_event.wait(refresh_rate)
 
     def set_image(self, image: Image) -> None:
-        self.mutex.acquire()
-        np_image = self.get_np_image(image=image)
-        self.sense_hat.set_pixels(pixel_list=np_image)
-        self.mutex.release()
+        with self.mutex:
+            self.sense_hat.set_pixels(
+                pixel_list=self.get_pixel_list(image=image)
+            )
