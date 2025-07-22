@@ -8,31 +8,17 @@ from pydantic import (
     Field,
 )
 
+from threading import Lock
 from sense_hat import SenseHat
-from threading import Thread, Lock
-from typing import Callable, TypeVar, Any
 
 from sensehat_dsp.gol import GOL
 from common.logger import get_logger
+from common.utils.threading import threaded
 
 from .utils import next_color
-from .dsp_images import dsp_images, ImageName
 
 
 logger = get_logger(__name__)
-
-
-F = TypeVar("F", bound=Callable[..., None])
-
-
-# TODO: Move this fucntion to common
-def threaded(func: Callable[..., None]) -> Callable[..., None]:
-    def wrapper(*args: Any, **kwargs: Any) -> None:
-        thread = Thread(target=func, args=args, kwargs=kwargs)
-        thread.daemon = True
-        thread.start()
-
-    return wrapper
 
 
 class Color(BaseModel):
@@ -51,7 +37,6 @@ class Image(BaseModel):
 class Display:
     def __init__(
         self,
-        images: list[Image] = dsp_images,
         initial_rotation: int = 180,
         refresh_rate: float = 1.0,
     ):
@@ -61,9 +46,6 @@ class Display:
         self.clear()
         self.mutex = Lock()
         self.is_active = False
-
-        images = [Image(**img) for img in images]
-        self.image_map = self.get_image_map(images=images)
 
         self.gol = GOL()
         self.refresh_rate = refresh_rate
@@ -94,24 +76,19 @@ class Display:
             ]
         )
 
-    @staticmethod
-    def get_image_map(images: list[Image]) -> dict:
-        return {
-            image.name: Display.get_np_image(image=image) for image in images
-        }
-
     @threaded
     def start_intermittent_image(
         self,
-        image_name: ImageName,
+        image: Image,
         refresh_rate: float = 0.5,
     ) -> None:
         self.mutex.acquire()
 
+        np_image = self.get_np_image(image=image)
         self.refresh_rate = refresh_rate
         self.is_active = True
         while self.is_active:
-            self.sense_hat.set_pixels(self.image_map[image_name])
+            self.sense_hat.set_pixels(np_image)
             sleep(self.refresh_rate)
             self.clear()
             sleep(self.refresh_rate)
@@ -121,16 +98,16 @@ class Display:
     @threaded
     def start_color_cycle(
         self,
-        image_name: ImageName,
+        image: Image,
         refresh_rate: float = 0.001,
     ) -> None:
         self.mutex.acquire()
         r, g, b = (255, 0, 0)
-        image = self.image_map[image_name]
+        np_image = self.get_np_image(image=image)
         image_mask = np.array(
             [
                 [1, 1, 1] if value > 0 else [0, 0, 0]
-                for value in np.sum(image, axis=1)
+                for value in np.sum(np_image, axis=1)
             ]
         )
 
@@ -168,7 +145,25 @@ class Display:
 
         self.mutex.release()
 
-    def set_image(self, image_name: str) -> None:
+    @threaded
+    def start_image_sequence(
+        self,
+        images: list[Image],
+        refresh_rate: float = 0.5,
+    ) -> None:
         self.mutex.acquire()
-        self.sense_hat.set_pixels(pixel_list=self.image_map[image_name])
+        self.refresh_rate = refresh_rate
+        self.is_active = True
+        while self.is_active:
+            for image in images:
+                np_image = self.get_np_image(image=image)
+                self.sense_hat.set_pixels(np_image)
+                sleep(self.refresh_rate)
+
+        self.mutex.release()
+
+    def set_image(self, image: Image) -> None:
+        self.mutex.acquire()
+        np_image = self.get_np_image(image=image)
+        self.sense_hat.set_pixels(pixel_list=np_image)
         self.mutex.release()

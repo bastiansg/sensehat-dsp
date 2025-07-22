@@ -1,27 +1,3 @@
-from typing import Literal
-
-
-ImageName = Literal[
-    "space-invader-1",
-    "space-invader-1a",
-    "space-invader-1b",
-    "space-invader-2",
-    "space-invader-3",
-    "space-invader-4",
-    "space-invader-5",
-    "left-arrow",
-    "right-arrow",
-    "up-arrow",
-    "down-arrow",
-    "heart",
-    "si-01",
-    "si-02",
-    "si-03",
-    "si-04",
-    "si-04a",
-]
-
-
 # fmt: off
 dsp_images = [
     {
@@ -408,6 +384,29 @@ dsp_images = [
             "r": 255,
             "g": 0,
             "b": 50,
+        },
+        "s_color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+        }
+    },
+    {
+        "name": "full",
+        "image": [
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+        ],
+        "p_color": {
+            "r": 128,
+            "g": 128,
+            "b": 128,
         },
         "s_color": {
             "r": 0,
