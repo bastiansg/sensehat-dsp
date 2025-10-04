@@ -1,7 +1,7 @@
-pydantic>=2.11.7
-fastapi[standard]>=0.116.1
-uvicorn>=0.35.0
+pydantic>=2.11.10
+fastapi[standard]>=0.118.0
+uvicorn>=0.37.0
+torch>=2.8.0
 
-torch>=2.7.1
-
-common @ git+https://git@github.com/aureka-team/common.git@v1.1.8
+# Aureka packages
+common >= 1.1.12
