@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 
 from time import sleep
@@ -29,7 +31,7 @@ class Color(BaseModel):
 
 class Image(BaseModel):
     name: StrictStr
-    image: list[NonNegativeInt] = Field(len=64)
+    image: list[NonNegativeInt] = Field(len=64)  # type: ignore
     p_color: Color = Field(description="Primary color.")
     s_color: Color = Field(description="Secundary color.")
 
@@ -147,3 +149,51 @@ class Display:
             self.sense_hat.set_pixels(
                 pixel_list=self.get_pixel_list(image=image)
             )
+
+    @threaded
+    def start_blinking(
+        self,
+        image: Image,
+        secondary_color: Color,
+        max_burst_len: int = 3,
+        min_refresh_rate: float = 0.1,
+        max_refrech_rate: float = 0.5,
+    ) -> None:
+        secondary_image = Image(
+            name=image.name,
+            image=image.image,
+            p_color=secondary_color,
+            s_color=image.s_color,
+        )
+
+        with self.mutex:
+            self.stop_event.clear()
+
+            while not self.stop_event.is_set():
+                burst_len = random.randint(1, max_burst_len)
+
+                for _ in range(burst_len):
+                    if self.stop_event.is_set():
+                        break
+
+                    self.sense_hat.set_pixels(
+                        pixel_list=self.get_pixel_list(image=image)
+                    )
+
+                    self.stop_event.wait(
+                        random.uniform(
+                            min_refresh_rate,
+                            max_refrech_rate,
+                        )
+                    )
+
+                    self.sense_hat.set_pixels(
+                        pixel_list=self.get_pixel_list(image=secondary_image)
+                    )
+
+                    self.stop_event.wait(
+                        random.uniform(
+                            min_refresh_rate,
+                            max_refrech_rate,
+                        )
+                    )
