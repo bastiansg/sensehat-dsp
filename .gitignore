@@ -5,6 +5,4 @@
 
 build/
 resources/
-
-.vscode/*
-!.vscode/launch.json
+.codex

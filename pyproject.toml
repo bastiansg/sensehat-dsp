@@ -14,13 +14,14 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 
+[tool.setuptools]
+package-dir = { "" = "src" }
+
 [tool.setuptools.packages.find]
-include = ["sensehat_dsp"]
+where = ["src"]
+include = ["sensehat_dsp*"]
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools_scm]
-
-[tool.setuptools.package-data]
-"sensehat_dsp" = ["conf/*"]
