@@ -14,13 +14,7 @@ from sense_hat import SenseHat
 from threading import Lock, Event
 
 from sensehat_dsp.gol import GOL
-from common.logger import get_logger
-from common.utils.threading import threaded
-
-from .utils import next_color
-
-
-logger = get_logger(__name__)
+from .utils import next_color, threaded
 
 
 class Color(BaseModel):

@@ -1,6 +1,5 @@
 {
     "name": "sensehat-dsp",
-    "initializeCommand": "make core-build",
     "dockerComposeFile": "docker-compose.yml",
     "service": "sensehat-dsp-devcontainer",
     "workspaceFolder": "/workspace",
