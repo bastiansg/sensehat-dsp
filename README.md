@@ -1,7 +1,9 @@
 # sensehat-dsp
 
-`sensehat_dsp` provides image and animation control for the Raspberry Pi Sense
-HAT LED matrix.
+`sensehat_dsp` provides image and animation control for the
+[Raspberry Pi Sense HAT LED matrix](https://www.raspberrypi.com/products/sense-hat/).
+The Sense HAT is a Raspberry Pi add-on board with an 8×8 RGB LED matrix,
+joystick, and environmental and motion sensors.
 
 ## Used by P.O.R.
 
